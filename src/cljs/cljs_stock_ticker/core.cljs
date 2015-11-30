@@ -4,12 +4,35 @@
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]))
 
+(def sample-data
+  [{:symbol "AAPL"
+    :price 118.20
+    :name "Apple"
+    :change-price 3.45}
+   {:symbol "NFLX"
+    :price 125.32
+    :name "Netflix",
+    :change-price -2.11}])
+
+;; -----------------
+;; Display functions
+(defn ticker-table-row [data]
+  [:tr
+   [:td (data :symbol)]
+   [:td (data :name)]
+   [:td (data :price)]])
+
+(defn ticker-table []
+  [:table
+   (map ticker-table-row sample-data)])
+
 ;; -------------------------
 ;; Views
 
 (defn home-page []
-  [:div [:h2 "Welcome to cljs_stock_ticker"]
-   [:div [:a {:href "/about"} "go to about page"]]])
+  [:div [:h2 "Welcome to Stock Ticker"]
+   [:div [:a {:href "/about"} "go to about page"]]
+   (ticker-table)])
 
 (defn about-page []
   [:div [:h2 "About cljs_stock_ticker"]
