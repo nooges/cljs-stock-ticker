@@ -2,7 +2,9 @@
     (:require [reagent.core :as reagent :refer [atom]]
               [reagent.session :as session]
               [secretary.core :as secretary :include-macros true]
-              [accountant.core :as accountant]))
+              [accountant.core :as accountant]
+              [cljs-http.client :as http]
+              [cljs.core.async :refer [<!]]))
 
 (def sample-data
   [{:symbol "AAPL"
