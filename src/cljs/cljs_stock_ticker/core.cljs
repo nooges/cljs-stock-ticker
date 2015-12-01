@@ -37,14 +37,14 @@
                                    {:with-credentials? false}))]
         (prn response))))
 
-(defn get-cnbc-data-via-yql2 [ticker-symbols]
+(defn get-cnbc-data-via-yql-x [ticker-symbols]
   (go (let [response (<! (http/get yql-url
-                                   {:with-credentials? false}
+                                   {:with-credentials? false
                                    :query-params
                                    {:q (yql-query (cnbc-url ticker-symbols))
                                     :format "json"
-                                    :callback "callback"}))]
-        (prn (:status response)))))
+                                    :callback "callback"}}))]
+        (prn response))))
 
 (def sample-data
   [{:symbol "AAPL"
@@ -74,7 +74,7 @@
 (defn home-page []
   [:div [:h2 "Welcome to Stock Ticker"]
    [:div [:a {:href "/about"} "go to about page"]]
-   (get-cnbc-data-via-yql ["AAPL" "NFLX"])
+   (get-cnbc-data-via-yql-x ["AAPL" "NFLX"])
    (ticker-table)])
 
 (defn about-page []
