@@ -19,8 +19,7 @@
                  [secretary "1.2.3"]
                  [venantius/accountant "0.1.4"]
                  [cljs-http "0.1.38"]
-                 [org.clojure/core.async "0.2.374"]
-                 ]
+                 [org.clojure/core.async "0.2.374"]]
 
   :plugins [[lein-environ "1.0.1"]
             [lein-cljsbuild "1.1.1"]

@@ -4,7 +4,47 @@
               [secretary.core :as secretary :include-macros true]
               [accountant.core :as accountant]
               [cljs-http.client :as http]
-              [cljs.core.async :refer [<!]]))
+              [cljs.core.async :refer [<!]]
+              [cljs-stock-ticker.codec :as codec])
+    (:require-macros [cljs.core.async.macros :refer [go]]))
+
+(def yql-url "http://query.yahooapis.com/v1/public/yql?q=")
+
+(defn cnbc-url [ticker-symbols]
+  (str "http://quote.cnbc.com/quote-html-webservice/quote.htm?"
+       (codec/form-encode
+        {:symbols "AAPL"
+         :requestMethod "quick"
+         :fund 1
+         :noform 1
+         :exthrs 1
+         :extMode "ALL"
+         :extendedMask 2
+         :output "json"})))
+
+(defn yql-query [url]
+  (str "select * from html where url=\"" url "\""))
+
+(defn yql-request-url [url]
+  (str yql-url
+       (js/encodeURIComponent (yql-query url))
+       "&format=json"
+       "&callback=hello"))
+
+(defn get-cnbc-data-via-yql [ticker-symbols]
+  (prn (yql-request-url (cnbc-url ticker-symbols)))
+  (go (let [response (<! (http/get (yql-request-url (cnbc-url ticker-symbols))
+                                   {:with-credentials? false}))]
+        (prn response))))
+
+(defn get-cnbc-data-via-yql2 [ticker-symbols]
+  (go (let [response (<! (http/get yql-url
+                                   {:with-credentials? false}
+                                   :query-params
+                                   {:q (yql-query (cnbc-url ticker-symbols))
+                                    :format "json"
+                                    :callback "callback"}))]
+        (prn (:status response)))))
 
 (def sample-data
   [{:symbol "AAPL"
@@ -34,6 +74,7 @@
 (defn home-page []
   [:div [:h2 "Welcome to Stock Ticker"]
    [:div [:a {:href "/about"} "go to about page"]]
+   (get-cnbc-data-via-yql ["AAPL" "NFLX"])
    (ticker-table)])
 
 (defn about-page []
