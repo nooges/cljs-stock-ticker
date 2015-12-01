@@ -38,13 +38,13 @@
         (prn response))))
 
 (defn get-cnbc-data-via-yql-x [ticker-symbols]
-  (go (let [response (<! (http/get yql-url
+  (go (let [response (<! (http/jsonp yql-url
                                    {:with-credentials? false
                                    :query-params
                                    {:q (yql-query (cnbc-url ticker-symbols))
                                     :format "json"
                                     :callback "callback"}}))]
-        (prn response))))
+        (prn (:body response)))))
 
 (def sample-data
   [{:symbol "AAPL"
