@@ -73,7 +73,7 @@
                   :low :low
                   :high :high
                   :open :open
-                  :list_time :last-time
+                  :last_time :last-time
                   :volume :volume
                   :change :change}]
     (into {} (map (fn [[old-key new-key]]
@@ -103,8 +103,8 @@
   [:tr
    [:td (:symbol data)]
    [:td (:name data)]
-   [:td (:last data)]
-   [:td (:volume data)]])
+   [:td (str (:last data) " (" (:change data) ")")]
+   [:td (:last-time data)]])
 
 (defn ticker-table [quotes]
   (cljs.pprint/pprint quotes)
