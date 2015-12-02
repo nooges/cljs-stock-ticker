@@ -6,7 +6,8 @@
               [cljs-http.client :as http]
               [cljs.core.async :refer [<!]]
               [cljs-stock-ticker.codec :as codec]
-              [clojure.string :as string])
+              [clojure.string :as string]
+              [cognitect.transit :as transit])
     (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def yql-url "http://query.yahooapis.com/v1/public/yql?q=")
@@ -51,6 +52,8 @@
 ;;                                    {:with-credentials? false}))]
 ;;         (prn response))))
 
+(def r (transit/reader :json))
+
 (defn get-cnbc-data-via-yql [ticker-symbols]
   (go (let [response (<! (http/jsonp yql-url
                                    {:with-credentials? false
@@ -58,7 +61,7 @@
                                    {:q (yql-query (cnbc-url ticker-symbols))
                                     :format "json"
                                     :callback "callback"}}))]
-        (prn (cljs.reader/read-string (get-in response [:body :query :results :body]))))))
+        (prn (transit/read r (get-in response [:body :query :results :body]))))))
 
 (def sample-data
   [{:symbol "AAPL"
