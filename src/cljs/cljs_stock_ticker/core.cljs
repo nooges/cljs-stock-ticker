@@ -7,7 +7,9 @@
               [cljs.core.async :refer [<!]]
               [cljs-stock-ticker.codec :as codec]
               [clojure.string :as string]
-              [cognitect.transit :as transit])
+              [cognitect.transit :as transit]
+              [cljs.pprint]
+              [clojure.walk :refer [keywordize-keys]])
     (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def yql-url "http://query.yahooapis.com/v1/public/yql?q=")
@@ -61,7 +63,28 @@
                                    {:q (yql-query (cnbc-url ticker-symbols))
                                     :format "json"
                                     :callback "callback"}}))]
-        (prn (transit/read r (get-in response [:body :query :results :body]))))))
+        (transit/read r (get-in response [:body :query :results :body])))))
+
+;; Extract needed information from CNBC quote into common format
+(defn convert-cnbc-quote [quote]
+  (let [mappings {:symbol :symbol
+                  :name :name
+                  :last :last
+                  :low :low
+                  :high :high
+                  :open :open
+                  :list_time :last-time
+                  :volume :volume
+                  :change :change}]
+    (into {} (map (fn [[old-key new-key]]
+                    [new-key (old-key quote)])
+                  mappings))))
+
+(defn convert-cnbc-data [data]
+  (let [quotes (get-in (keywordize-keys data) [:QuickQuoteResult :QuickQuote])]
+    ;(cljs.pprint/pprint quotes)
+    (cljs.pprint/pprint (map convert-cnbc-quote quotes))
+    ))
 
 (def sample-data
   [{:symbol "AAPL"
@@ -93,7 +116,7 @@
    [:div [:a {:href "/about"} "go to about page"]]
    ;(prn (codec/form-encode {:test "fd s"}))
    ;(prn (cnbc-url-x ["AAPL" "NFLX"]))
-   (get-cnbc-data-via-yql ["AAPL" "NFLX" "SPY"])
+   (go (convert-cnbc-data (<! (get-cnbc-data-via-yql ["AAPL" "NFLX" "SPY"]))))
    (ticker-table)])
 
 (defn about-page []
