@@ -9,7 +9,10 @@
               [clojure.string :as string]
               [cognitect.transit :as transit]
               [cljs.pprint]
-              [clojure.walk :refer [keywordize-keys]])
+              [clojure.walk :refer [keywordize-keys]]
+              [cljs-time.core :as tc]
+              [cljs-time.format :as tf]
+              [goog.string :as gstring])
     (:require-macros [cljs.core.async.macros :refer [go]]))
 
 (def yql-url "http://query.yahooapis.com/v1/public/yql?q=")
@@ -102,8 +105,10 @@
   ^{:key (:symbol data)}
   [:tr
    [:td (:symbol data)]
-   [:td (:name data)]
-   [:td (str (:last data) " (" (:change data) ")")]
+   [:td (subs (:name data) 0 15)]
+   [:td (str (gstring/format "%.2f" (:last data))
+             " (" (gstring/format "%.2f" (:change data)) ")")]
+   [:td (str (:low data) " - " (:high data))]
    [:td (:last-time data)]])
 
 (defn ticker-table [quotes]
@@ -114,7 +119,7 @@
 ;; Views
 
 (defonce state (atom {:quotes sample-data
-                      :symbols ["AAPL" "NFLX" "SPY"]}))
+                      :symbols ["AAPL" "NFLX" "SPY" "VIX" "VXX"]}))
 
 (defn ticker-table-component []
   (ticker-table (@state :quotes)))
