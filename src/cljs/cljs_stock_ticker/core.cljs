@@ -93,22 +93,29 @@
   [{:symbol "AAPL"
     :last 118.20
     :name "Apple"
-    :change 3.45}
+    :change 3.45,
+    :low 0
+    :high 232}
    {:symbol "NFLX"
     :last 125.32
     :name "Netflix",
-    :change -2.11}])
+    :change -2.11,
+    :low 23
+    :high 234}])
 
 ;; -----------------
 ;; Display functions
+(defn round-price [price]
+  (gstring/format "%.2f" price))
+
 (defn ticker-table-row [data]
   ^{:key (:symbol data)}
   [:tr
    [:td (:symbol data)]
    [:td (subs (:name data) 0 15)]
-   [:td (str (gstring/format "%.2f" (:last data))
-             " (" (gstring/format "%.2f" (:change data)) ")")]
-   [:td (str (:low data) " - " (:high data))]
+   [:td (str (round-price (:last data))
+             " (" (round-price (:change data)) ")")]
+   [:td (str (round-price (:low data)) " - " (round-price (:high data)))]
    [:td (:last-time data)]])
 
 (defn ticker-table [quotes]
@@ -124,13 +131,10 @@
 (defn ticker-table-component []
   (ticker-table (@state :quotes)))
 
-(defn update-ticker-table [quotes]
-  (swap! state assoc :quotes quotes))
-
-(defn hello [] (prn "hello"))
-
 (defn update-quotes []
-  (go (update-ticker-table (convert-cnbc-data (<! (get-cnbc-data-via-yql (@state :symbols)))))))
+  (go (swap! state assoc
+             :quotes (convert-cnbc-data
+                      (<! (get-cnbc-data-via-yql (@state :symbols)))))))
 
 (defn home-page []
   [:div [:h2 "Welcome to Stock Ticker"]
