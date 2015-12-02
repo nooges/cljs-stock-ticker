@@ -83,18 +83,18 @@
 (defn convert-cnbc-data [data]
   (let [quotes (get-in (keywordize-keys data) [:QuickQuoteResult :QuickQuote])]
     ;(cljs.pprint/pprint quotes)
-    (cljs.pprint/pprint (map convert-cnbc-quote quotes))
+    (map convert-cnbc-quote quotes)
     ))
 
 (def sample-data
   [{:symbol "AAPL"
-    :price 118.20
+    :last 118.20
     :name "Apple"
-    :change-price 3.45}
+    :change 3.45}
    {:symbol "NFLX"
-    :price 125.32
+    :last 125.32
     :name "Netflix",
-    :change-price -2.11}])
+    :change -2.11}])
 
 ;; -----------------
 ;; Display functions
@@ -102,22 +102,30 @@
   [:tr
    [:td (data :symbol)]
    [:td (data :name)]
-   [:td (data :price)]])
+   [:td (data :last)]])
 
-(defn ticker-table []
+(defn ticker-table [quotes]
+  (cljs.pprint/pprint quotes)
   [:table
-   (map ticker-table-row sample-data)])
-
+   (map ticker-table-row quotes)])
 ;; -------------------------
 ;; Views
+
+(def state (atom {:quotes sample-data}))
+
+(defn ticker-table-component []
+  (ticker-table (@state :quotes)))
+
+(defn update-ticker-table [quotes]
+  (swap! state assoc :quotes quotes))
 
 (defn home-page []
   [:div [:h2 "Welcome to Stock Ticker"]
    [:div [:a {:href "/about"} "go to about page"]]
+   [ticker-table-component]
    ;(prn (codec/form-encode {:test "fd s"}))
    ;(prn (cnbc-url-x ["AAPL" "NFLX"]))
-   (go (convert-cnbc-data (<! (get-cnbc-data-via-yql ["AAPL" "NFLX" "SPY"]))))
-   (ticker-table)])
+   (go (update-ticker-table (convert-cnbc-data (<! (get-cnbc-data-via-yql ["AAPL" "NFLX" "SPY"])))))])
 
 (defn about-page []
   [:div [:h2 "About cljs_stock_ticker"]
