@@ -108,19 +108,27 @@
 (defn round-price [price]
   (gstring/format "%.2f" price))
 
+(defn price-button [price]
+  (if (> price 0)
+    :button.btn-positive
+    :button.btn-negative))
+
 (defn ticker-table-row [data]
   ^{:key (:symbol data)}
-  [:tr
-   [:td (:symbol data)]
-   [:td (subs (:name data) 0 15)]
-   [:td (str (round-price (:last data))
+  [:li.table-view-cell
+   [:span
+    (:symbol data)
+    [:br]
+    (subs (:name data) 0 15)]
+   [(price-button (:change data))
+    (str (round-price (:last data))
              " (" (round-price (:change data)) ")")]
-   [:td (str (round-price (:low data)) " - " (round-price (:high data)))]
-   [:td (:last-time data)]])
+   [:span (str (round-price (:low data)) " - " (round-price (:high data)))]
+   [:span (:last-time data)]])
 
 (defn ticker-table [quotes]
   (cljs.pprint/pprint quotes)
-  [:table
+  [:ul.table-view
    (map ticker-table-row quotes)])
 ;; -------------------------
 ;; Views
