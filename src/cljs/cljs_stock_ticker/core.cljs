@@ -99,10 +99,12 @@
 ;; -----------------
 ;; Display functions
 (defn ticker-table-row [data]
+  ^{:key (:symbol data)}
   [:tr
-   [:td (data :symbol)]
-   [:td (data :name)]
-   [:td (data :last)]])
+   [:td (:symbol data)]
+   [:td (:name data)]
+   [:td (:last data)]
+   [:td (:volume data)]])
 
 (defn ticker-table [quotes]
   (cljs.pprint/pprint quotes)
@@ -111,7 +113,8 @@
 ;; -------------------------
 ;; Views
 
-(def state (atom {:quotes sample-data}))
+(defonce state (atom {:quotes sample-data
+                      :symbols ["AAPL" "NFLX" "SPY"]}))
 
 (defn ticker-table-component []
   (ticker-table (@state :quotes)))
@@ -119,13 +122,18 @@
 (defn update-ticker-table [quotes]
   (swap! state assoc :quotes quotes))
 
+(defn hello [] (prn "hello"))
+
+(defn update-quotes []
+  (go (update-ticker-table (convert-cnbc-data (<! (get-cnbc-data-via-yql (@state :symbols)))))))
+
 (defn home-page []
   [:div [:h2 "Welcome to Stock Ticker"]
    [:div [:a {:href "/about"} "go to about page"]]
-   [ticker-table-component]
-   ;(prn (codec/form-encode {:test "fd s"}))
-   ;(prn (cnbc-url-x ["AAPL" "NFLX"]))
-   (go (update-ticker-table (convert-cnbc-data (<! (get-cnbc-data-via-yql ["AAPL" "NFLX" "SPY"])))))])
+   [ticker-table-component]])
+
+;; Timer
+(defonce quote-updater (js/setInterval update-quotes 1000))
 
 (defn about-page []
   [:div [:h2 "About cljs_stock_ticker"]
