@@ -3,6 +3,8 @@ Stock Ticker
 
 Stock ticker display written in Clojurescript
 
+This is my first attempt ever at writing anything in Clojure/Clojurescript, so please excuse any weirdness or inefficiencies in my code. The last time I did something with Lisp was about 15 years ago while learning Scheme.
+
 Goals
 -----
 - Pull down ticker data from Google Finance or CNBC
